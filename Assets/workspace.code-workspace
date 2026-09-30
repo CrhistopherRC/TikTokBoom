@@ -1,0 +1,10 @@
+{
+	"folders": [],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "yuliana",
+		"java.project.referencedLibraries": [
+			"lib/**/*.jar",
+			"c:\\Users\\cristo\\Downloads\\mysql-connector-j-9.6.0\\mysql-connector-j-9.6.0\\mysql-connector-j-9.6.0.jar"
+		]
+	}
+}
