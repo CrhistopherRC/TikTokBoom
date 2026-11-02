@@ -1,91 +1,39 @@
-
 using UnityEngine;
+using UnityEngine.UI;
 
 public class IndicadorManoVR : MonoBehaviour
 {
     [Header("CONTROLADOR VR")]
     public Transform manoDerecha;
-
     [Header("INTERFAZ")]
     public RectTransform indicador;
     public RectTransform seccionReferencia;
-
+    public SelectorMenuRadial selector;
     [Header("CONFIGURACION")]
-    public float distanciaMaxima = 0.15f;
-
-    [Range(0f, 0.9f)]
-    public float proporcionCentro = 0.34f;
-
+    public float distanciaMaxima = .15f;
+    [Range(0f, .9f)] public float proporcionCentro = .37f;
     private RectTransform canvasRect;
+    private Image imagen;
 
-    void Awake()
+    private void Awake()
     {
         canvasRect = GetComponent<RectTransform>();
-
+        if (selector == null) selector = GetComponent<SelectorMenuRadial>();
         if (indicador != null)
+        {
+            imagen = indicador.GetComponent<Image>();
             indicador.gameObject.SetActive(false);
+        }
     }
 
-    void LateUpdate()
+    private void LateUpdate()
     {
-        if (manoDerecha == null ||
-            indicador == null ||
-            seccionReferencia == null)
-            return;
-
-        // Distancia de la mano al plano del menu
-        Vector3 normal = seccionReferencia.forward;
-
-        float distanciaConSigno = Vector3.Dot(
-            manoDerecha.position - seccionReferencia.position,
-            normal
-        );
-
-        float distancia = Mathf.Abs(distanciaConSigno);
-
-        // Posicion local de la mano
-        Vector3 posicionLocal =
-            seccionReferencia.InverseTransformPoint(
-                manoDerecha.position
-            );
-
-        Vector2 posicion = new Vector2(
-            posicionLocal.x - seccionReferencia.rect.center.x,
-            posicionLocal.y - seccionReferencia.rect.center.y
-        );
-
-        // Comprobar los limites del menu
-        float radioExterior = Mathf.Min(
-            seccionReferencia.rect.width,
-            seccionReferencia.rect.height
-        ) / 2f;
-
-        float radioInterior =
-            radioExterior * proporcionCentro;
-
-        bool dentroDelMenu =
-            distancia <= distanciaMaxima &&
-            posicion.magnitude >= radioInterior &&
-            posicion.magnitude <= radioExterior;
-
-        indicador.gameObject.SetActive(dentroDelMenu);
-
-        if (!dentroDelMenu)
-            return;
-
-        // Proyectar la mano sobre el plano del menu
-        Vector3 puntoProyectado =
-            manoDerecha.position -
-            normal * distanciaConSigno;
-
-        // Convertir al espacio local del Canvas
-        Vector3 puntoCanvas =
-            canvasRect.InverseTransformPoint(puntoProyectado);
-
-        // Mover el indicador
-        indicador.anchoredPosition = new Vector2(
-            puntoCanvas.x,
-            puntoCanvas.y
-        );
+        if (indicador == null || canvasRect == null) return;
+        bool visible = selector != null && selector.enabled && selector.MenuAbierto && selector.PuntoEnMenu;
+        indicador.gameObject.SetActive(visible);
+        if (!visible) return;
+        Vector3 local = canvasRect.InverseTransformPoint(selector.PuntoApuntado);
+        indicador.anchoredPosition = new Vector2(local.x, local.y);
+        if (imagen != null) imagen.color = selector.OpcionActual >= 0 ? Color.cyan : new Color(.85f, .9f, 1f);
     }
 }

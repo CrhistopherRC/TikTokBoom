@@ -3,23 +3,27 @@ using UnityEngine.InputSystem;
 
 public class InputPrueba : MonoBehaviour
 {
-    public InputActionProperty InputActionValue;    
+    public InputActionProperty InputActionValue;
     public InputActionProperty InputActionButton;
+    [SerializeField] private bool mostrarDiagnostico;
+    private float ultimoValor;
+    private bool ultimoBoton;
+    private bool primeraLectura = true;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Update()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        float value = InputActionValue.action.ReadValue<float>();
-        Debug.Log("Value : " + value);
-
-        bool button = InputActionButton.action.IsPressed();
-        Debug.Log("Button : " + button);
-        
+        if (!mostrarDiagnostico) return;
+        var valorAction = InputActionValue.action;
+        var botonAction = InputActionButton.action;
+        if (valorAction == null || botonAction == null) return;
+        float valor = valorAction.ReadValue<float>();
+        bool boton = botonAction.IsPressed();
+        if (primeraLectura || Mathf.Abs(valor - ultimoValor) > .01f)
+            Debug.Log("Value : " + valor, this);
+        if (primeraLectura || boton != ultimoBoton)
+            Debug.Log("Button : " + boton, this);
+        ultimoValor = valor;
+        ultimoBoton = boton;
+        primeraLectura = false;
     }
 }

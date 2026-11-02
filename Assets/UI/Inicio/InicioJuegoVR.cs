@@ -13,6 +13,17 @@ public sealed class InicioJuegoVR : MonoBehaviour
     private Camera camara;
     private bool gatilloAnterior;
     private bool cargando;
+    private SelectorMenuRadial selectorMenu;
+
+    private void Start()
+    {
+        foreach (var selector in FindObjectsByType<SelectorMenuRadial>(FindObjectsSortMode.None))
+            if (selector.manoDerecha != null && selector.opciones != null && selector.opciones.Length > 0)
+            {
+                selectorMenu = selector;
+                break;
+            }
+    }
 
     private void Update()
     {
@@ -30,9 +41,12 @@ public sealed class InicioJuegoVR : MonoBehaviour
                 mirando = rect.rect.Contains(new Vector2(punto.x, punto.y));
             }
         }
-        if (bordeEnfoque != null) bordeEnfoque.enabled = mirando;
+        bool apuntando = selectorMenu != null && selectorMenu.BotonApuntado == botonInicio;
+        if (bordeEnfoque != null) bordeEnfoque.enabled = mirando || apuntando;
         if (textoEstado != null)
-            textoEstado.text = mirando ? "PULSA EL GATILLO PARA COMENZAR" : "MIRA INICIAR Y PULSA EL GATILLO";
+            textoEstado.text = apuntando ? "PULSA X PARA COMENZAR"
+                : mirando ? "GATILLO PARA INICIAR / X SI APUNTAS CON EL MANDO"
+                : "APUNTA AL BOTÓN CON EL MANDO Y PULSA X";
         bool gatillo = Gatillo(XRNode.RightHand) || Gatillo(XRNode.LeftHand);
         if (mirando && gatillo && !gatilloAnterior) botonInicio.onClick.Invoke();
         gatilloAnterior = gatillo;
